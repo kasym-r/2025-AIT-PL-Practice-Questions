@@ -30,10 +30,8 @@ def rename_item(old_name, new_name):
 
 def reprice(name, new_price):
     idx = find_item(name)
-    for i in range(len(prices)):
-        prices[idx] = new_price
-        return True
-    return False
+    prices[idx] = new_price
+    return True
 
 def remove_item(name):
     if name in names:
