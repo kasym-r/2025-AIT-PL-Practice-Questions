@@ -38,7 +38,7 @@ def total_balance(bank, currency, rates):
             total += balance_in_target
     return round(total, 2)
 
-# print(total_balance(bank, "KGS", rates))
+print(total_balance(bank, "KGS", rates))
 
 # 3. Найти счёт по ID
 # find_account(bank: dict, account_id: str) -> dict | None — вернуть запись счёта или None.

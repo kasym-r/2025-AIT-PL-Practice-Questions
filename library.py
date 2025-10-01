@@ -86,7 +86,7 @@ def list_available(library):
                 available_books.append(book['title'])
     return sorted(available_books)
 
-# print(list_available(library))
+print(list_available(library))
 
 # 7. Размер раздела
 # section_size(library: dict, section: str) -> int — вернуть количество книг в разделе (0, если раздел отсутствует).
@@ -135,49 +135,181 @@ def longest_title(library):
     # arr = []
     # for sections, books in library.items():
     #     for book in books:
-            # arr.append(book['title'])
+    #         arr.append(book['title'])
     # return sorted(arr, key = len)[-1]
     titles = [book['title'] for books in library.values() for book in books]
     if not titles:
         return None
     return max(sorted(titles), key = len)
     
-print(longest_title(library))
+# print(longest_title(library))
 
 # 11. Отчёт по библиотеке
 # report(library: dict) -> dict — вернуть {'total_books': int, 'available': int, 'checked_out': 
 # int, 'sections': {sec: {'total': int, 'available': int, 'checked_out': int}}}.
+def report(library):
+    total_books = 0
+    available = 0
+    checked_out = 0
+    sections_report = {}
 
+    for section, books in library.items():
+        sec_total = len(books)
+        sec_available = sum(1 for book in books if book['available'])
+        sec_checked_out = sec_total - sec_available
 
+        sections_report[section] = {
+            "total": sec_total,
+            "available": sec_available,
+            "checked_out": sec_checked_out
+        }
+
+        total_books += sec_total
+        available += sec_available
+        checked_out += sec_checked_out
+    
+    return {
+        "total_books": total_books,
+        "available": available,
+        "checked_out": checked_out,
+        "sections": sections_report
+    }
+
+# print(report(library))
 
 # 12. Добавить книгу в раздел
 # add_book(library: dict, section: str, title: str, available: bool=True) -> bool
 # — создать раздел при необходимости; не допускать дубликаты названий в разделе (без учёта регистра).
-
+def add_book(library, section, title, available: bool = True):
+    if section not in library:
+        library[section] = []
+    
+    for book in library[section]:
+        if book['title'].lower() == title.lower():
+            return False
+    
+    library[section].append({"title": title, "available": available})
+    return True
                 
+# print(add_book(library, "Fiction", "the great gatsby",), library)
 
 # 13. Удалить книгу по названию
-# remove_book(library: dict, title: str) -> bool — удалить первое вхождение книги
-# (по всем разделам).
+# remove_book(library: dict, title: str) -> bool — удалить первое вхождение книги (по всем разделам).
+def remove_book(library, title):
+    for books in library.values():
+        for i, book in enumerate(books):
+            if book['title'].lower() == title.lower():
+                books.pop(i)
+                return True
+    return False
+
+# print(remove_book(library, 'the great gatsby'), library)
+
 # 14. Переместить книгу между разделами
-# move_book(library: dict, title: str, to_section: str) -> bool — переместить
-# книгу, сохранив статус; не создавать дубликатов в целевом разделе.
+# move_book(library: dict, title: str, to_section: str) -> bool — переместить книгу, сохранив статус; не создавать дубликатов в целевом разделе.
+def move_book(library, title, to_section):
+    if to_section not in library:
+        library[to_section] = []
+
+    for section, books in library.items():
+        for i, book in enumerate(books):
+            if book['title'] == title:
+                books.pop(i)
+                library[to_section].append(book)
+                return True
+    return False
+
+# print(move_book(library, "The Great Gatsby", "Science"), library)
+
 # 15. Удалить дубликаты в разделе
-# dedupe_section_titles(library: dict, section: str) -> int — удалить дубли
-# названий в разделе, сохранив первое вхождение; вернуть число удалённых.
+# dedupe_section_titles(library: dict, section: str) -> int — удалить дубли названий в разделе, сохранив первое вхождение; вернуть число удалённых.
+# def dedupe_section_titles(library, section): 
+def dedupe_section_titles(library, section):
+    if section not in library:
+        return 0
+    
+    seen = set()
+    unique_books = []
+    removed = 0
+
+    for book in library[section]:
+        title_lower = book['title'].lower()
+        if title_lower not in seen:
+            seen.add(title_lower)
+            unique_books.append(book)
+        else:
+            removed += 1
+
+    library[section] = unique_books
+
+    return removed, unique_books
+
+# print(dedupe_section_titles(library, 'Fiction'))
+
 # 16. Поиск по префиксу
 # titles_starting_with(library: dict, prefix: str, only_available: bool=False) ->
-# list[str] — поиск названий по префиксу (без учёта регистра); опционально только
-# доступные; вернуть отсортированный список.
+# list[str] — поиск названий по префиксу (без учёта регистра); опционально только доступные; вернуть отсортированный список.
+def titles_starting_with(library, prefix, only_available):
+    arr = []
+    for section, books in library.items():
+        for book in books:
+            if book['title'].lower().startswith(prefix.lower()) and book['available'] == only_available:
+                arr.append(book['title'])
+    return sorted(arr)
+
+# print(titles_starting_with(library, "The", True))
+
 # 17. Доля доступных по разделам
-# availability_ratio(library: dict) -> dict[str, float] — вернуть долю доступных
-# книг в каждом разделе (округлить до 2 знаков).
+# availability_ratio(library: dict) -> dict[str, float] — вернуть долю доступных книг в каждом разделе (округлить до 2 знаков).
+def availability_ratio(library):
+    ratios = {}
+    for section, books in library.items():
+        sec_total = len(books)
+        sec_available = sum(1 for book in books if book['available'])
+        sec_ratio = round(sec_available / sec_total, 2)
+
+        ratios[section] = {
+            "ratio": sec_ratio
+        }
+    return ratios
+
+# print(availability_ratio(library))
+
 # 18. Top-K доступных книг раздела
-# top_k_available_by_section(library: dict, section: str, k: int) -> list[str] —
-# до k доступных названий раздела в алфавитном порядке.
+# top_k_available_by_section(library: dict, section: str, k: int) -> list[str] — до k доступных названий раздела в алфавитном порядке.
+def top_k_available_by_section(library, section, k):
+    books = [book['title'] for book in library.get(section, []) if book['available']]
+    return sorted(books)[:k]
+
+# print(top_k_available_by_section(library, 'Science', 2))
+
 # 19. Нормализовать названия
 # normalize_titles(library: dict) -> int — обрезать пробелы, сжать множественные
 # пробелы, применить Title Case; вернуть сколько изменено.
+def normalize_titles(library):
+    count = 0
+    for section, books in library.items():
+        for book in books:
+            old_name = book['title']
+            new_name = " ".join(old_name.split()).title()
+            if new_name != old_name:
+                book['title'] = new_name
+                count += 1
+    return count
+
+# print(normalize_titles(library), library)
+
 # 20. Сравнить разделы
 # compare_sections(library: dict, section1: str, section2: str) -> list[str] —
 # вернуть список книг, которые есть в обоих разделах.
+def compare_sections(library, section1, section2):
+    set1 = {book['title'] for book in library.get(section1, [])}
+    set2 = {book['title'] for book in library.get(section2, [])}
+    common = set1 & set2
+    # return sorted([book["title"] for sec in (section1, section2) for book in library.get(sec, []) if book["title"].lower() in common])
+    titles = []
+    for sec in (section1, section2):
+        for book in library.get(sec, []):
+            if book["title"].lower() in common and book["title"] not in titles:
+                titles.append(book["title"])
+    return sorted(titles)
