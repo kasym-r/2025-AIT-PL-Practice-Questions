@@ -103,14 +103,14 @@ def assign_section(seating, klass, passenger_prefix = 'Гость'):
     if klass not in seating:
         return False
     
-    for i, ticket in enumerate(seating[klass], start = 1):
+    for ticket in seating[klass]:
         if not ticket['occupied']:
             ticket['occupied'] = True
             ticket['passenger'] = f"{passenger_prefix}-{count + 1}"
             count += 1
     return count
 
-# print(assign_section(seating, 'Economy'))
+print(assign_section(seating, 'Economy'), seating['Economy'])
 
 # 9. Самое длинное имя пассажира
 # longest_passenger(seating: dict) -> str | None — вернуть самое длинное имя среди занятых мест (при равенстве — по алфавиту).
@@ -120,7 +120,7 @@ def longest_passenger(seating):
         return None
     return max(sorted(passengers), key = len)
 
-print(longest_passenger(seating))
+# print(longest_passenger(seating))
 
 # 10. Отчёт по рассадке
 # report(seating: dict) -> dict — вернуть суммарные и по классам: {'total_seats',
@@ -152,7 +152,7 @@ def top_k_available(seating, klass, k):
     seats = [seat['id'] for seat in seating.get(klass, []) if not seat['occupied']]
     return sorted(seats)[:k]
 
-print(top_k_available(seating, 'Economy', 3))
+# print(top_k_available(seating, 'Economy', 3))
 
 # 18. Нормализовать имена пассажиров
 # normalize_passengers(seating: dict) -> int — обрезать/сжать пробелы и применить

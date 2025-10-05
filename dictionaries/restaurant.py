@@ -26,7 +26,7 @@ menu = {
 def count_items(menu):
     return sum(len(orders) for orders in menu.values()) 
 
-# print(count_items(menu))
+print(count_items(menu))
 
 # 2. Подсчёт доступных к заказу
 # count_orderable(menu: dict) -> int — вернуть число блюд, где available == True и stock > 0.
@@ -185,7 +185,7 @@ def category_summary(menu):
 
     return summary
     
-print(category_summary(menu))
+# print(category_summary(menu))
 
 # 14. Самые дешёвые k блюд
 # cheapest_k(menu: dict, k: int) -> list[tuple[str,str,float]] — до k самых
